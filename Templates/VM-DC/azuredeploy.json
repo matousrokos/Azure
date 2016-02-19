@@ -69,7 +69,7 @@
     "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC/ConfigureDC.json",
     "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC/DSC/CreateADPDC.ps1.zip",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-    "apiVersion": "2015-06-15",
+    "apiVersion": "2015-11-01",
     "storageName": "[concat('storage', uniqueString(resourceGroup().id))]",
     "adDataDiskName": "ADData"
   },
@@ -79,10 +79,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
-        "Microsoft.Resources/deployments/SettingUpStorageAccount",
-        "Microsoft.Resources/deployments/CreatingNetworkInterfaces",
-        "Microsoft.Resources/deployments/CreatingAvailabilitySets",
-        "Microsoft.Resources/deployments/SettingUpLoadBalancers"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', parameters('adnicName'))]"
       ],
       "properties": {
         "mode": "Incremental",
