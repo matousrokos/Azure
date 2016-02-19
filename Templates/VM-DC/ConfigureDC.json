@@ -23,19 +23,18 @@
     "adNicName": {
       "type": "string"
     },
-    "adModulesURL": {
-      "type": "string"
-    },
-    "adConfigurationFunction": {
-      "type": "string"
-    },
     "domainName": {
       "type": "string"
     }
   },
+  "variables": {
+    "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC/DSC/",
+    "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
+    "apiVersion": "2015-06-15"
+  },
   "resources": [
     {
-      "apiVersion": "2015-06-15",
+      "apiVersion": "[variables('apiVersion')]",
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('adVMName')]",
       "location": "[parameters('location')]",
@@ -94,7 +93,7 @@
         {
           "type": "Microsoft.Compute/virtualMachines/extensions",
           "name": "[concat(parameters('adVMName'),'/InstallDomainController')]",
-          "apiVersion": "2015-06-15",
+          "apiVersion": "[variables('apiVersion')]",
           "location": "[parameters('location')]",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', parameters('adVMName'))]"
@@ -105,9 +104,9 @@
             "typeHandlerVersion": "2.13",
             "autoUpgradeMinorVersion": false,
             "settings": {
-              "ModulesUrl": "[parameters('adModulesURL')]",
+              "ModulesUrl": "[variables('adModulesURL')]",
               "wmfVersion": "4.0",
-              "ConfigurationFunction": "[parameters('adConfigurationFunction')]",
+              "ConfigurationFunction": "[variables('adConfigurationFunction')]",
               "Properties": {
                 "DomainName": "[parameters('domainName')]",
                 "AdminCreds": {
