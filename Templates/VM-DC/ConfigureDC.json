@@ -45,8 +45,8 @@
         },
         "osProfile": {
           "computerName": "[parameters('adVMName')]",
-          "adAdminUsername": "[parameters('adAdminUsername')]",
-          "adAdminPassword": "[parameters('adAdminPassword')]"
+          "adminUsername": "[parameters('adAdminUsername')]",
+          "adminPassword": "[parameters('adAdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
