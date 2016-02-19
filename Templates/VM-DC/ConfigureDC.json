@@ -28,7 +28,7 @@
     }
   },
   "variables": {
-    "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC/DSC",
+    "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC/DSC/CreateADPDC.ps1.zip",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
     "apiVersion": "2015-06-15"
   },
