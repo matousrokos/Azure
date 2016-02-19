@@ -14,16 +14,16 @@
     "adAvailabilitySetName": {
       "type": "string"
     },
-    "adminUsername": {
+    "adAdminUsername": {
       "type": "string"
     },
-    "adminPassword": {
+    "adAdminPassword": {
       "type": "securestring"
     },
     "storageName": {
       "type": "string"
     },
-    "adDataDisk": {
+    "adDataDiskName": {
       "type": "string"
     },
     "adNicName": {
@@ -51,8 +51,8 @@
         },
         "osProfile": {
           "computerName": "[parameters('adVMName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
+          "adAdminUsername": "[parameters('adAdminUsername')]",
+          "adAdminPassword": "[parameters('adAdminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -117,14 +117,14 @@
               "Properties": {
                 "DomainName": "[parameters('domainName')]",
                 "AdminCreds": {
-                  "UserName": "[parameters('adminUserName')]",
-                  "Password": "PrivateSettingsRef:AdminPassword"
+                  "UserName": "[parameters('adAdminUsername')]",
+                  "Password": "PrivateSettingsRef:adAdminPassword"
                 }
               }
             },
             "protectedSettings": {
               "Items": {
-                "AdminPassword": "[parameters('adminPassword')]"
+                "adAdminPassword": "[parameters('adAdminPassword')]"
               }
             }
           }
