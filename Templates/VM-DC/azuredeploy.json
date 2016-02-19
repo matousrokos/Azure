@@ -70,8 +70,7 @@
     "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC/DSC/CreateADPDC.ps1.zip",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
     "apiVersion": "2015-06-15",
-    "storageName": "[concat('storage', uniqueString(resourceGroup().id))]",
-    "adDataDiskName": "ADData"
+    "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -106,9 +105,6 @@
           },
           "storageName": {
             "value": "[variables('storageName')]"
-          },
-          "adDataDiskName": {
-            "value": "[variables('adDataDiskName')]"
           },
           "adNicName": {
             "value": "[parameters('adNicName')]"
