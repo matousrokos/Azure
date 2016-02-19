@@ -18,10 +18,14 @@
       "type": "string"
     },
     "adAdminPassword": {
-      "type": "string"
+      "type": "securestring"
     },
     "domainName": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "contoso.local",
+      "metadata": {
+        "description": "FQDN"
+      }
     },
     "location": {
       "type": "string",
