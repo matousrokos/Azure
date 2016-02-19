@@ -101,7 +101,7 @@
           "adAdminUsername": {
             "value": "[parameters('adAdminUsername')]"
           },
-          "adminPassword": {
+          "adAdminPassword": {
             "value": "[parameters('adAdminPassword')]"
           },
           "storageName": {

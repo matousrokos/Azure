@@ -11,9 +11,6 @@
     "adVMSize": {
       "type": "string"
     },
-    "adAvailabilitySetName": {
-      "type": "string"
-    },
     "adAdminUsername": {
       "type": "string"
     },
