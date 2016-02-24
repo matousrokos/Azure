@@ -17,7 +17,7 @@
     "adAdminPassword": {
       "type": "securestring"
     },
-    "storageName": {
+    "existingStorageName": {
       "type": "string"
     },
     "virtualNetworkName": {
@@ -87,7 +87,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',parameters('storageName'),'.blob.core.windows.net/vhds/',parameters('adVMName'),'-osdisk.vhd')]"
+              "uri": "[concat('http://',parameters('existingStorageName'),'.blob.core.windows.net/vhds/',parameters('adVMName'),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -95,7 +95,7 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat('http://',parameters('storageName'),'.blob.core.windows.net/vhds/', 'data','-1.vhd')]"
+                "uri": "[concat('http://',parameters('existingStorageName'),'.blob.core.windows.net/vhds/', 'data','-1.vhd')]"
               },
               "name": "[concat(parameters('adVMName'),'-data-disk1')]",
               "caching": "None",
@@ -115,7 +115,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": "true",
-            "storageUri": "[concat('http://',parameters('storageName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('existingStorageName'),'.blob.core.windows.net')]"
           }
         }
       },
