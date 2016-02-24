@@ -23,7 +23,7 @@
     "adNicName": {
       "type": "string"
     },
-    "dCVNETName": {
+    "virtualNetworkName": {
       "type": "string"
     },
     "dCSubnetName":{
@@ -34,7 +34,7 @@
     }
   },
   "variables": {
-    "adNicVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('dCVNETName'))]",
+    "adNicVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "adNicSubnetRef": "[concat(variables('adNicVnetID'), '/subnets/', parameters('dCSubnetName'))]",
     "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC-Provision/DSC/CreateADPDC.ps1.zip",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
