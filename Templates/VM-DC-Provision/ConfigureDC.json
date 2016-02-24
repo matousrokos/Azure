@@ -71,6 +71,9 @@
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[parameters('adVMName')]",
       "location": "[parameters('location')]",
+      "dependsOn": [
+        "concat('Microsoft.Network/networkInterfaces/,parameters('adNicName'))"
+      ],
       "properties": {
         "hardwareProfile": {
           "vmSize": "[parameters('adVMSize')]"
