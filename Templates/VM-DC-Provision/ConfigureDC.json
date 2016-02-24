@@ -47,7 +47,6 @@
       "location": "[parameters('location')]",
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', parameters('dCVNETName'))]"
       ],
       "tags": {
         "displayName": "DC-NIC"
