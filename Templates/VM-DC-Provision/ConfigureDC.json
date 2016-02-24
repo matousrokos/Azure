@@ -31,7 +31,6 @@
     }
   },
   "variables": {
-    "storageReference": "[reference(concat('Microsoft.Storage/storageAccounts/', parameters('storageName')), '2015-06-15')]",
     "adNicName": "[concat(parameters('adVMName'),'-NIC')]",
     "adNicVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "adNicSubnetRef": "[concat(variables('adNicVnetID'), '/subnets/', parameters('dCSubnetName'))]",
@@ -88,7 +87,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat(variables('storageReference'),'/vhds/',parameters('adVMName'),'-osdisk.vhd')]"
+              "uri": "[concat('http://',parameters('storageName'),'.blob.core.windows.net/vhds/',parameters('adVMName'),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
