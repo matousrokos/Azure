@@ -46,9 +46,6 @@
       "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
       ],
-      "tags": {
-        "displayName": "DC-NIC"
-      },
       "properties": {
         "ipConfigurations": [
           {
