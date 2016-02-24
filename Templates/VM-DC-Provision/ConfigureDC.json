@@ -20,9 +20,6 @@
     "storageName": {
       "type": "string"
     },
-    "adNicName": {
-      "type": "string"
-    },
     "virtualNetworkName": {
       "type": "string"
     },
@@ -34,6 +31,7 @@
     }
   },
   "variables": {
+    "adNicName": "[concat(parameters('adVMName'),'-NIC')]",
     "adNicVnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
     "adNicSubnetRef": "[concat(variables('adNicVnetID'), '/subnets/', parameters('dCSubnetName'))]",
     "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC-Provision/DSC/CreateADPDC.ps1.zip",
@@ -42,7 +40,7 @@
   },
   "resources": [
     {
-      "name": "[parameters('adNicName')]",
+      "name": "[variables('adNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('location')]",
       "apiVersion": "[variables('apiVersion')]",
@@ -71,7 +69,7 @@
       "name": "[parameters('adVMName')]",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "concat('Microsoft.Network/networkInterfaces/,parameters('adNicName'))"
+        "concat('Microsoft.Network/networkInterfaces/,variables('adNicName'))"
       ],
       "properties": {
         "hardwareProfile": {
@@ -113,7 +111,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',parameters('adNicName'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('adNicName'))]"
             }
           ]
         },
