@@ -23,9 +23,9 @@
     "virtualNetworkName": {
       "type": "string"
     },
-    "dCSubnetName":{
-    "type": "string"
-  },
+    "dCSubnetName": {
+      "type": "string"
+    },
     "domainName": {
       "type": "string"
     }
@@ -36,7 +36,7 @@
     "adNicSubnetRef": "[concat(variables('adNicVnetID'), '/subnets/', parameters('dCSubnetName'))]",
     "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC-Provision/DSC/CreateADPDC.ps1.zip",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-    "apiVersion": "2015-05-01-preview"
+    "apiVersion": "2015-11-01"
   },
   "resources": [
     {
