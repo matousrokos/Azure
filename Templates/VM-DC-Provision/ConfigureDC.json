@@ -36,14 +36,14 @@
     "adNicSubnetRef": "[concat(variables('adNicVnetID'), '/subnets/', parameters('dCSubnetName'))]",
     "adModulesURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC-Provision/DSC/CreateADPDC.ps1.zip",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
-    "apiVersion": "2015-11-01"
+    "apiVersion": "2015-06-15"
   },
   "resources": [
     {
       "name": "[variables('adNicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[parameters('location')]",
-      "apiVersion": "2015-06-15",
+      "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
       ],
       "properties": {
