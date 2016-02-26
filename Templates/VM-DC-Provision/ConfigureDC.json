@@ -87,7 +87,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat(parameters('existingStorageName'),'/vhds/',parameters('adVMName'),'-osdisk.vhd')]"
+              "uri": "[concat(parameters('existingStorageName'),'vhds/',parameters('adVMName'),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -95,7 +95,7 @@
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat(parameters('existingStorageName'),'/vhds/', 'data','-1.vhd')]"
+                "uri": "[concat(parameters('existingStorageName'),'vhds/', 'data','-1.vhd')]"
               },
               "name": "[concat(parameters('adVMName'),'-data-disk1')]",
               "caching": "None",
