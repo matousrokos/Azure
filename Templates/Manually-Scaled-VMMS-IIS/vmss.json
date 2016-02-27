@@ -4,6 +4,7 @@
   "parameters": {
     "vmSSName": {
       "type": "string",
+      "defaultValue": "iisvmss",
       "metadata": {
         "description": "The Name of the Scaleset"
       }
@@ -14,14 +15,9 @@
         "description": "Number of VM instances"
       }
     },
-    "newStorageAccountSuffix": {
-      "type": "string",
-      "metadata": {
-        "description": "The Prefix for the names of the new storage accounts created"
-      }
-    },
     "dnsNamePrefix": {
       "type": "string",
+      "defaultValue": "mtiisskol",
       "metadata": {
         "description": "The Prefix for the DNS names of the new IP address created"
       }
@@ -40,14 +36,18 @@
     },
     "location": {
       "type": "string",
+      "defaultValue": "North Europe",
+      "allowedValues": [
+        "North Europe",
+        "West Europe"
+      ],
       "metadata": {
         "description": "Deployment location"
-      },
-      "defaultValue": "[resourceGroup().location]"
+      }
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "vmssvnet"
+      "defaultValue": "vNET"
     },
     "addressPrefix": {
       "type": "string",
@@ -63,6 +63,7 @@
     }
   },
   "variables": {
+    "newStorageAccountSuffix": "[toLower(parameters('vmSSName'))]",
     "baseURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/Manual-VMMS-IIS/Script/",
     "customScriptFile": "SimpleDefaultIIS.ps1",
     "iisConfigurationScriptLocation": "[concat(variables('baseURL'),variables('customScriptFile'))]",
@@ -70,8 +71,8 @@
     "imageOffer": "WindowsServer",
     "imageVersion": "2012-R2-Datacenter",
     "storageAccountType": "Standard_LRS",
-    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',parameters('subnetName'))]",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
     "publicIPAddressName": "vmsspublicip",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "nicName": "networkInterface1",
@@ -95,7 +96,7 @@
       "s",
       "y"
     ],
-    "diagnosticsStorageAccountName": "[concat('a', parameters('newStorageAccountSuffix'))]",
+    "diagnosticsStorageAccountName": "[concat('a', variables('newStorageAccountSuffix'))]",
     "diagnosticsStorageAccountResourceGroup": "[resourceGroup().name]",
     "accountid": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',variables('diagnosticsStorageAccountResourceGroup'),'/providers/','Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]",
     "wadlogs": "<WadCfg> <DiagnosticMonitorConfiguration overallQuotaInMB=\"4096\" xmlns=\"http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration\"> <DiagnosticInfrastructureLogs scheduledTransferLogLevelFilter=\"Error\"/> <WindowsEventLog scheduledTransferPeriod=\"PT1M\" > <DataSource name=\"Application!*[System[(Level = 1 or Level = 2)]]\" /> <DataSource name=\"Security!*[System[(Level = 1 or Level = 2)]]\" /> <DataSource name=\"System!*[System[(Level = 1 or Level = 2)]]\" /></WindowsEventLog>",
@@ -108,7 +109,7 @@
 	"resources": [
 		{
 			"type": "Microsoft.Storage/storageAccounts",
-			"name": "[concat(variables('storageAccountPrefix')[copyIndex()],parameters('newStorageAccountSuffix'))]",
+			"name": "[concat(variables('storageAccountPrefix')[copyIndex()],variables('newStorageAccountSuffix'))]",
 			"apiVersion": "2015-06-15",
 			"copy": {
 				"name": "storageLoop",
@@ -117,27 +118,6 @@
 			"location": "[parameters('location')]",
 			"properties": {
 				"accountType": "[variables('storageAccountType')]"
-			}
-		},
-		{
-			"apiVersion": "2015-06-15",
-			"type": "Microsoft.Network/virtualNetworks",
-			"name": "[parameters('virtualNetworkName')]",
-			"location": "[parameters('location')]",
-			"properties": {
-				"addressSpace": {
-					"addressPrefixes": [
-						"[parameters('addressPrefix')]"
-					]
-				},
-				"subnets": [
-					{
-						"name": "[parameters('subnetName')]",
-						"properties": {
-							"addressPrefix": "[parameters('subnetPrefix')]"
-						}
-					}
-				]
 			}
 		},
 		{
@@ -232,16 +212,16 @@
 			"tags": {
 				"vmsstag1": "Myriad"
 			},
-			"dependsOn": [
-				"[concat('Microsoft.Storage/storageAccounts/a',parameters('newStorageAccountSuffix'))]",
-				"[concat('Microsoft.Storage/storageAccounts/g',parameters('newStorageAccountSuffix'))]",
-				"[concat('Microsoft.Storage/storageAccounts/m',parameters('newStorageAccountSuffix'))]",
-				"[concat('Microsoft.Storage/storageAccounts/s',parameters('newStorageAccountSuffix'))]",
-				"[concat('Microsoft.Storage/storageAccounts/y',parameters('newStorageAccountSuffix'))]",
-				"[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
-				"[concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/a',variables('newStorageAccountSuffix'))]",
+        "[concat('Microsoft.Storage/storageAccounts/g',variables('newStorageAccountSuffix'))]",
+        "[concat('Microsoft.Storage/storageAccounts/m',variables('newStorageAccountSuffix'))]",
+        "[concat('Microsoft.Storage/storageAccounts/s',variables('newStorageAccountSuffix'))]",
+        "[concat('Microsoft.Storage/storageAccounts/y',variables('newStorageAccountSuffix'))]",
+        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
 
-			],
+      ],
 			"sku": {
 				"name": "Standard_A2",
 				"tier": "Standard",
@@ -254,13 +234,13 @@
 				"virtualMachineProfile": {
 					"storageProfile": {
 						"osDisk": {
-							"vhdContainers": [
-								"[concat('https://a',parameters('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-								"[concat('https://g',parameters('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-								"[concat('https://m',parameters('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-								"[concat('https://s',parameters('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-								"[concat('https://y',parameters('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]"
-							],
+              "vhdContainers": [
+                "[concat('https://a',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
+                "[concat('https://g',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
+                "[concat('https://m',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
+                "[concat('https://s',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
+                "[concat('https://y',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]"
+              ],
 							"name": "vmssosdisk",
 							"caching": "ReadOnly",
 							"createOption": "FromImage"
