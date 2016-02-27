@@ -64,7 +64,7 @@
   },
   "variables": {
     "newStorageAccountSuffix": "[toLower(parameters('vmSSName'))]",
-    "baseURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/Manual-VMMS-IIS/Script/",
+    "baseURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/Manually-Scaled-VMMS-IIS/Script/",
     "customScriptFile": "SimpleDefaultIIS.ps1",
     "iisConfigurationScriptLocation": "[concat(variables('baseURL'),variables('customScriptFile'))]",
     "imagePublisher": "MicrosoftWindowsServer",
