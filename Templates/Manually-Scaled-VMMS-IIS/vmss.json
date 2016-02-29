@@ -77,7 +77,7 @@
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "nicName": "networkInterface1",
     "nicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]",
-    "lbName": "loadBalancer1",
+    "lbName": "iisloadBalancer",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "lbFEName": "loadBalancerFrontEnd",
     "lbWebProbeName": "loadBalancerWebProbe",
@@ -218,8 +218,7 @@
         "[concat('Microsoft.Storage/storageAccounts/m',variables('newStorageAccountSuffix'))]",
         "[concat('Microsoft.Storage/storageAccounts/s',variables('newStorageAccountSuffix'))]",
         "[concat('Microsoft.Storage/storageAccounts/y',variables('newStorageAccountSuffix'))]",
-        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]"
 
       ],
 			"sku": {
@@ -266,16 +265,21 @@
 									"ipConfigurations": [
 										{
 											"name": "ip1",
-											"properties": {
-												"subnet": {
-													"id": "[variables('subnetRef')]"
-												},
-												"loadBalancerBackendAddressPools": [
-													{
-														"id": "[ variables('lbBEAddressPoolID')]"
-													}
-												]
-											}
+                      "properties": {
+                        "subnet": {
+                          "id": "[variables('subnetRef')]"
+                        },
+                        "loadBalancerBackendAddressPools": [
+                          {
+                            "id": "[ variables('lbBEAddressPoolID')]"
+                          }
+                        ],
+                        "loadBalancerInboundNatPools": [
+                          {
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/inboundNatPools/', variables('natPoolName'))]"
+                          }
+                        ]
+                      }
 										}
 									]
 								}
