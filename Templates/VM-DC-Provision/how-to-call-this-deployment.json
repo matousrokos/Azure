@@ -1,0 +1,149 @@
+﻿{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adVMName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adVMSize": {
+      "type": "string",
+      "defaultValue": "Standard_A1"
+    },
+    "adAdminUsername": {
+      "type": "string"
+    },
+    "adAdminPassword": {
+      "type": "securestring"
+    },
+    "domainName": {
+      "type": "string",
+      "defaultValue": "contoso.local",
+      "metadata": {
+        "description": "FQDN"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "North Europe",
+      "allowedValues": [
+        "North Europe",
+        "West Europe"
+      ]
+    },
+    "virtualNetworkName": {
+      "type": "string"
+    },
+    "VNETPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "dCSubnetName": {
+      "type": "string",
+      "defaultValue": "DCSubnet"
+    },
+    "dCSubnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24"
+    },
+    "storageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS",
+        "Premium_LRS"
+      ]
+    }
+  },
+  "variables": {
+    "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC-Provision/ConfigureDC.json",
+    "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
+    "apiVersion": "2015-06-15",
+    "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "name": "vNET",
+      "type": "Microsoft.Network/virtualNetworks",
+      "location": "[parameters('location')]",
+      "apiVersion": "[variables('apiVersion')]",
+      "tags": {
+        "displayName": "vNET"
+      },
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[parameters('vNETPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[parameters('dCSubnetName')]",
+            "properties": {
+              "addressPrefix": "[parameters('dCSubnetPrefix')]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('storageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[parameters('location')]",
+      "apiVersion": "[variables('apiVersion')]",
+      "properties": {
+        "accountType": "[parameters('storageType')]"
+      }
+    },
+    {
+      "name": "ProvisioningADDomainController",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-11-01",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+        "[concat('Microsoft.Network/VirtualNetworks/', 'vNET')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('adTemplateURL')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "adVMName": {
+            "value": "[parameters('adVMName')]"
+          },
+          "adVMSize": {
+            "value": "[parameters('adVMSize')]"
+          },
+          "adAdminUsername": {
+            "value": "[parameters('adAdminUsername')]"
+          },
+          "adAdminPassword": {
+            "value": "[parameters('adAdminPassword')]"
+          },
+          "existingStorageName": {
+            "value": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('storageName')), '2015-06-15').primaryEndpoints.blob]"
+          },
+          "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+          },
+          "dCSubnetName": {
+            "value": "[parameters('dCSubnetName')]"
+          },
+          "domainName": {
+            "value": "[parameters('domainName')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
