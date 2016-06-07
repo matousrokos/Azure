@@ -1,0 +1,63 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "customer": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "West Europe",
+      "allowedValues": [
+        "West Europe",
+        "East US",
+        "Southeast Asia"
+      ]
+    }
+  },
+  "variables": {
+    "vaultName": "[concat(parameters('customer'),'-RecoveryVault')]",
+    "aSRskuTier": "Standard",
+    "automationAccountName": "[concat(parameters('customer'),'-Automation')]",
+    "automationSkuTier": "Free",
+    "logAnalyticsName": "[concat(parameters('customer'),'-LogAnalytics')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.RecoveryServices/vaults",
+      "apiVersion": "2016-05-01",
+      "name": "[variables('vaultName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "RS0",
+        "tier": "[variables('aSRskuTier')]"
+      },
+      "properties": {
+      }
+    },
+    {
+      "name": "[variables('automationAccountName')]",
+      "type": "Microsoft.Automation/automationAccounts",
+      "apiVersion": "2015-10-31",
+      "location": "[parameters('location')]",
+      "dependsOn": [ ],
+      "tags": { },
+      "properties": {
+        "sku": {
+          "name": "[variables('automationSkuTier')]"
+        }
+      }
+    },
+    {
+      "name": "[variables('logAnalyticsName')]",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "apiVersion": "2015-03-20",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "name": "[variables('automationSkuTier')]"
+        }
+      }
+    }
+      ]
+    }
