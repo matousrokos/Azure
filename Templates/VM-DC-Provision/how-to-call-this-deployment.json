@@ -104,7 +104,7 @@
       "apiVersion": "2015-11-01",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
-        "[concat('Microsoft.Network/VirtualNetworks/', 'vNET')]"
+        "[concat('Microsoft.Network/VirtualNetworks/', parameters('virtualNetworkName'))]"
       ],
       "properties": {
         "mode": "Incremental",
