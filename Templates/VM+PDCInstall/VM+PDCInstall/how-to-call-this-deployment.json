@@ -51,15 +51,13 @@
       "defaultValue": "Standard_LRS",
       "allowedValues": [
         "Standard_LRS",
-        "Standard_ZRS",
         "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
+        "Standard_RAGRS"
       ]
     }
   },
   "variables": {
-    "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM-DC-Provision/ConfigureDC.json",
+    "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/ConfigureDC.json",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
     "apiVersion": "2015-06-15",
     "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
