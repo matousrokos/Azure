@@ -17,7 +17,7 @@
     "dCSubnetPrefix": {
       "type": "string"
     },
-    "dCIPOutput": {
+    "dCIPAdress": {
       "type": "string"
     }
   },
@@ -41,7 +41,7 @@
         },
         "dhcpOptions": {
           "dnsServers": [
-            "[parameters('dCIPOutput')]"
+            "[parameters('dCIPAdress')]"
           ]
         },
         "subnets": [

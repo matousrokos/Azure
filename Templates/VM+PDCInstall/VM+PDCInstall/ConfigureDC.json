@@ -26,6 +26,9 @@
     "dCSubnetName": {
       "type": "string"
     },
+    "dCIPAdress": {
+      "type": "string"
+    },
     "domainName": {
       "type": "string"
     }
@@ -52,6 +55,7 @@
             "name": "ipconfig1",
             "properties": {
               "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('dCIPAdress')]",
               "subnet": {
                 "id": "[variables('adNicSubnetRef')]"
               }
@@ -156,10 +160,6 @@
     }
   ],
   "outputs": {
-    "dCIP": {
-      "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('aDVMName'),'-NIC','/ipConfigurations/ipconfig1'),'2015-06-15').privateIPAddress]",
-      "type": "string"
-    }
   }
 }
 

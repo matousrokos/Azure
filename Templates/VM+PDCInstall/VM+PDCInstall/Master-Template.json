@@ -46,6 +46,13 @@
       "type": "string",
       "defaultValue": "10.0.0.0/24"
     },
+    "dCIPAdress": {
+      "type": "string",
+      "defaultValue": "10.0.0.4",
+      "metadata": {
+        "desription": "Please note that first 3 adresses from every Azure subnets are used by gateway and cannot be used by VM. Last adress is used for multicast and cannot be used either"
+      }
+    },
     "storageType": {
       "type": "string",
       "defaultValue": "Standard_LRS",
@@ -136,6 +143,9 @@
           "dCSubnetName": {
             "value": "[parameters('dCSubnetName')]"
           },
+          "dCIPAdress": {
+            "value": "[parameters('dCIPAdress')]"
+          },
           "domainName": {
             "value": "[parameters('domainName')]"
           }
@@ -171,8 +181,8 @@
               "dCSubnetPrefix": {
                 "value": "[parameters('dCSubnetPrefix')]"
               },
-              "dCIPOutput": {
-                "value": "[reference('ProvisioningADDomainController').outputs.result]"
+              "dCIPAdress": {
+                "value": "[parameters('dCIPAdress')]"
               }
 
             }
