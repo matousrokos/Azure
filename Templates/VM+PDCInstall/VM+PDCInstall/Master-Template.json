@@ -60,6 +60,7 @@
     "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/ConfigureDC.json",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
     "apiVersion": "2015-06-15",
+    "dNSTemplateURL": "",
     "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
   },
   "resources": [
@@ -140,7 +141,44 @@
           }
         }
       }
-    }
+    },
+      {
+          "name": "DNS-Modification",
+          "type": "Microsoft.Resources/deployments",
+          "apiVersion": "2015-01-01",
+        "dependsOn": [
+          "Microsoft.Resources/deployments/ProvisioningADDomainController"
+        ],
+          "properties": {
+              "mode": "Incremental",
+            "templateLink": {
+              "uri": "[variables('dNSTemplateURL')]",
+              "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+              "location": {
+                "value": "[parameters('location')]"
+              },
+              "virtualNetworkName": {
+                "value": "[parameters('virtualNetworkName')]"
+              },
+              "VNETPrefix": {
+                "value": "[parameters('VNETPrefix')]"
+              },
+              "dCSubnetName": {
+                "value": "[parameters('dCSubnetName')]"
+              },
+              "dCSubnetPrefix": {
+                "value": "[parameters('dCSubnetPrefix')]"
+              },
+              "dCIPOutput": {
+                "value": "[reference('ProvisioningADDomainController').outputs.result]"
+              }
+
+            }
+          }
+      }
+
   ],
   "outputs": {
   }
