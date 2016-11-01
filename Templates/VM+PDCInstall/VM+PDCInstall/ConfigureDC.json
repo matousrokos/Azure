@@ -157,8 +157,8 @@
   ],
   "outputs": {
     "dCIP": {
-      "type": "string",
-      "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('aDVMName'),'-NIC'),'2015-06-15').privateIPAddress]"
+      "value": "[reference(concat('Microsoft.Network/networkInterfaces/', parameters('aDVMName'),'-NIC','/ipConfigurations/ipconfig1'),'2015-06-15').privateIPAddress]",
+      "type": "string"
     }
   }
 }
