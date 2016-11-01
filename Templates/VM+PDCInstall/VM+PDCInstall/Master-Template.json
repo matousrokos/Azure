@@ -67,7 +67,7 @@
     "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/ConfigureDC.json",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
     "apiVersion": "2015-06-15",
-    "dNSTemplateURL": "",
+    "dNSTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/DNS-Modification.json",
     "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
   },
   "resources": [
