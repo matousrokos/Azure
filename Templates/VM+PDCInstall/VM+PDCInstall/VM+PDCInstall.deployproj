@@ -27,7 +27,7 @@
   <ItemGroup>
     <None Include="DNS-Modification.json" />
     <None Include="azuredeploy.parameters.json" />
-    <None Include="ConfigureDC.json" />
+    <None Include="NewDC+Forest.json" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>

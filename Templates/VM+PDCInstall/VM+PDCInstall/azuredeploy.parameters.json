@@ -10,6 +10,9 @@
         },
         "virtualNetworkName": {
             "value": "DCVNET"
+        },
+        "scenario": {
+            "value": "NewDC+Forest"
         }
     }
 }

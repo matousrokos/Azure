@@ -2,6 +2,12 @@
     "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
   "parameters": {
+    "scenario": {
+      "type": "string",
+      "allowedValues": [
+        "NewDC+Forest"
+      ]
+    },
     "adVMName": {
       "type": "string",
       "minLength": 1
@@ -64,7 +70,7 @@
     }
   },
   "variables": {
-    "adTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/ConfigureDC.json",
+    "adTemplateURL": "[concat('https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/', parameters('scenario'), '.json')]",
     "adConfigurationFunction": "CreateADPDC.ps1\\CreateADPDC",
     "apiVersion": "2015-06-15",
     "dNSTemplateURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/VM%2BPDCInstall/VM%2BPDCInstall/DNS-Modification.json",
