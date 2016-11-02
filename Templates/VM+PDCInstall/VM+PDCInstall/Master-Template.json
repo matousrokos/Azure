@@ -34,7 +34,9 @@
       "type": "string"
     },
     "adAdminPassword": {
-      "type": "securestring"
+      "type": "securestring",
+      "minLength": 12,
+      "maxLength": 123
     },
     "domainName": {
       "type": "string",
@@ -48,7 +50,9 @@
       "defaultValue": "North Europe",
       "allowedValues": [
         "North Europe",
-        "West Europe"
+        "West Europe",
+        "UK South",
+        "UK North"
       ]
     },
     "virtualNetworkName": {
