@@ -14,7 +14,21 @@
     },
     "adVMSize": {
       "type": "string",
-      "defaultValue": "Standard_A1"
+      "defaultValue": "Standard_A1",
+      "allowedValues": [
+        "Standard_A1",
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_D1",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D1_v2",
+        "Standard_D2_v2",
+        "Standard_D3_v2",
+        "Standard_F1",
+        "Standard_F2",
+        "Standard_F3"
+      ]
     },
     "adAdminUsername": {
       "type": "string"
