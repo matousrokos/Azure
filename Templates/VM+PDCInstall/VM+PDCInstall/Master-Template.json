@@ -5,7 +5,8 @@
     "scenario": {
       "type": "string",
       "allowedValues": [
-        "NewDC+Forest"
+        "NewDC+Forest",
+        "NewDCinExistingForest"
       ]
     },
     "adVMName": {
@@ -34,10 +35,8 @@
       "type": "string"
     },
     "adAdminPassword": {
-      "type": "securestring",
-      "minLength": 12,
-      "maxLength": 123
-    },
+      "type": "securestring"
+      },
     "domainName": {
       "type": "string",
       "defaultValue": "contoso.local",

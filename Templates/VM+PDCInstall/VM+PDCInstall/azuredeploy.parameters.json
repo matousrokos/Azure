@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adVMName": {
-            "value": "OurDC"
+            "value": "OurBDC"
         },
         "adAdminUsername": {
             "value": "MatousRokos"
@@ -12,7 +12,10 @@
             "value": "DCVNET"
         },
         "scenario": {
-            "value": "NewDC+Forest"
+            "value": "NewDCinExistingForest"
+        },
+        "dCIPAdress": {
+            "value": "10.0.0.5"
         }
     }
 }
