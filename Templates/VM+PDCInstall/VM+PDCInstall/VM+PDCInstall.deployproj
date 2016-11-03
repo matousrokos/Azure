@@ -33,6 +33,7 @@
     </None>
     <Content Include="Deploy-AzureResourceGroup.ps1" />
     <None Include="Master-Template.json" />
+    <None Include="NewDCinExistingForest.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
