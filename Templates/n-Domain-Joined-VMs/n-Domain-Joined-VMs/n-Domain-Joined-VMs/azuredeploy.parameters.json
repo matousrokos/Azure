@@ -1,0 +1,36 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "MatousRokos"
+        },
+        "resourceNamePrefix": {
+            "value": "domjoin"
+        },
+        "numberOfInstances": {
+            "value": 1
+        },
+        "vmSize": {
+            "value": "Standard_A1"
+        },
+        "domainFQDN": {
+            "value": "contoso.local"
+        },
+        "ouPath": {
+            "value": "OU=Computers,DC=Contoso,DC=local"
+        },
+        "subnet1Name": {
+            "value": "DCSubnet"
+        },
+        "location": {
+            "value": "North Europe"
+        },
+        "oS": {
+            "value": "2012-R2-Datacenter"
+        },
+        "domainJoinCredentials": {
+            "value": "contoso\\\\MatousRokos"
+        }
+    }
+}
