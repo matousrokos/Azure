@@ -227,9 +227,6 @@
 			"apiVersion":"2015-06-15",
 			"name":"[parameters('vmSSName')]",
 			"location":"[parameters('location')]",
-			"tags":{
-				"vmsstag1":"Myriad"
-			},
 			"dependsOn":[
 					"[concat('Microsoft.Storage/storageAccounts/a',parameters('newStorageAccountSuffix'))]",
 					"[concat('Microsoft.Storage/storageAccounts/g',parameters('newStorageAccountSuffix'))]",
