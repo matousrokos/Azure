@@ -77,14 +77,14 @@
       "metadata": {
         "description": "The Base URL for the script and website"
       },
-      "defaultValue": "https://sdaviesms.blob.core.windows.net/customscripts/"
+      "defaultValue": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/Simple-VMSS-IIS-Autoscale/Simple-VMSS-IIS-Autoscale/resources/"
     },
     "customScriptFile": {
       "type": "string",
       "metadata": {
         "description": "The name of the custom script file in the baseURL location"
       },
-      "defaultValue": "install-iis-and-default-web-app.ps1"
+      "defaultValue": "deploy-iis-and-webapp.ps1"
     },
     "websiteZipFile": {
       "type": "string",
