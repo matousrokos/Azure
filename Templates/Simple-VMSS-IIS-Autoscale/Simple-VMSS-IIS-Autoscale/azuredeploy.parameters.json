@@ -4,6 +4,18 @@
     "parameters": {
         "namePrefix": {
             "value": "vmss"
+        },
+        "instanceCount": {
+            "value": "2"
+        },
+        "dnsNamePrefix": {
+            "value": "mrvmsssam"
+        },
+        "adminUsername": {
+            "value": "MatousRokos"
+        },
+        "location": {
+            "value": "North Europe"
         }
     }
 }

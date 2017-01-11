@@ -20,13 +20,14 @@
         "description": "The Prefix for the DNS names of the new IP address created"
       }
     },
-    "imageVersion": {
+    "sku": {
       "type": "string",
       "defaultValue": "2016-Datacenter",
       "allowedValues": [
         "2008-R2-Datacenter",
         "2012-R2-Datacenter",
-        "2016-Datacenter"
+        "2016-Datacenter",
+        "2016-Nano-Server"
       ],
       "metadata": {
         "description": "Windows version to be deployed"
@@ -281,7 +282,7 @@
             "imageReference": {
               "publisher": "[variables('imagePublisher')]",
               "offer": "[variables('imageOffer')]",
-              "sku": "[parameters('imageVersion')]",
+              "sku": "[parameters('sku')]",
               "version": "latest"
             }
           },
