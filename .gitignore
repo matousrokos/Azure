@@ -214,3 +214,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+/Templates/Simple-VMSS-IIS-Autoscale/Simple-VMSS-IIS-Autoscale/deploy-iis-and-webapp.ps1
+/Templates/Simple-VMSS-IIS-Autoscale/Simple-VMSS-IIS-Autoscale/website.zip
