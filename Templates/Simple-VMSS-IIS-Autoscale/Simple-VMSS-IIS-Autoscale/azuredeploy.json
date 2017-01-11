@@ -141,7 +141,7 @@
       "name": "[concat(variables('storageAccountPrefix')[copyIndex()],parameters('namePrefix'),uniqueString(resourceGroup().id))]",
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-01-01",
+      "apiVersion": "[variables('apiVersion')]",
       "properties": {
         "accountType": "[variables('storageAccountType')]"
       },
