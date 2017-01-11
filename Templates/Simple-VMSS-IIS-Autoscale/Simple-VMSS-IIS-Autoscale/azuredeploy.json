@@ -32,7 +32,7 @@
       "metadata": {
         "description": "Windows version to be deployed"
       }
-    }
+    },
     "adminUsername": {
       "type": "string",
       "metadata": {
