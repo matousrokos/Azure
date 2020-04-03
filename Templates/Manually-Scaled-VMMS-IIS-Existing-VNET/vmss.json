@@ -1,5 +1,5 @@
 ﻿{
-	"$schema": "http://schema.management.azure.com/schemas/2015-01-01-preview/deploymentTemplate.json",
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
 	"contentVersion": "1.0.0.0",
   "parameters": {
     "vmSSName": {
@@ -63,20 +63,18 @@
     }
   },
   "variables": {
-    "newStorageAccountSuffix": "[toLower(parameters('vmSSName'))]",
     "baseURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/Manually-Scaled-VMMS-IIS/Script/",
     "customScriptFile": "SimpleDefaultIIS.ps1",
     "iisConfigurationScriptLocation": "[concat(variables('baseURL'),variables('customScriptFile'))]",
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
-    "imageVersion": "2012-R2-Datacenter",
-    "storageAccountType": "Standard_LRS",
+    "imageVersion": "2016-Datacenter",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
     "publicIPAddressName": "vmsspublicip",
     "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
     "nicName": "networkInterface1",
-    "nicId": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]",
+    "nsgName": "[concat(parameters('vmSSName'),'-nsg')]",
     "lbName": "iisloadBalancer",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "lbFEName": "loadBalancerFrontEnd",
@@ -89,39 +87,33 @@
     "natStartPort": 50000,
     "natEndPort": 50099,
     "natBackendPort": 3389,
-    "storageAccountPrefix": [
-      "a",
-      "g",
-      "m",
-      "s",
-      "y"
-    ],
-    "diagnosticsStorageAccountName": "[concat('a', variables('newStorageAccountSuffix'))]",
-    "diagnosticsStorageAccountResourceGroup": "[resourceGroup().name]",
-    "accountid": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',variables('diagnosticsStorageAccountResourceGroup'),'/providers/','Microsoft.Storage/storageAccounts/', variables('diagnosticsStorageAccountName'))]",
-    "wadlogs": "<WadCfg> <DiagnosticMonitorConfiguration overallQuotaInMB=\"4096\" xmlns=\"http://schemas.microsoft.com/ServiceHosting/2010/10/DiagnosticsConfiguration\"> <DiagnosticInfrastructureLogs scheduledTransferLogLevelFilter=\"Error\"/> <WindowsEventLog scheduledTransferPeriod=\"PT1M\" > <DataSource name=\"Application!*[System[(Level = 1 or Level = 2)]]\" /> <DataSource name=\"Security!*[System[(Level = 1 or Level = 2)]]\" /> <DataSource name=\"System!*[System[(Level = 1 or Level = 2)]]\" /></WindowsEventLog>",
-    "wadperfcounters1": "<PerformanceCounters scheduledTransferPeriod=\"PT1M\"><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% Processor Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU utilization\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% Privileged Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU privileged time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor(_Total)\\% User Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"CPU user time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Processor Information(_Total)\\Processor Frequency\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"CPU frequency\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\System\\Processes\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Processes\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Thread Count\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Threads\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Process(_Total)\\Handle Count\" sampleRate=\"PT15S\" unit=\"Count\"><annotation displayName=\"Handles\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\% Committed Bytes In Use\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Memory usage\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Available Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory available\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Committed Bytes\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory committed\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\Memory\\Commit Limit\" sampleRate=\"PT15S\" unit=\"Bytes\"><annotation displayName=\"Memory commit limit\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\% Disk Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Disk active time\" locale=\"en-us\"/></PerformanceCounterConfiguration>",
-    "wadperfcounters2": "<PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\% Disk Read Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Disk active read time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\% Disk Write Time\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Disk active write time\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Transfers/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Disk operations\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Reads/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Disk read operations\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Writes/sec\" sampleRate=\"PT15S\" unit=\"CountPerSecond\"><annotation displayName=\"Disk write operations\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Bytes/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk speed\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Read Bytes/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk read speed\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\PhysicalDisk(_Total)\\Disk Write Bytes/sec\" sampleRate=\"PT15S\" unit=\"BytesPerSecond\"><annotation displayName=\"Disk write speed\" locale=\"en-us\"/></PerformanceCounterConfiguration><PerformanceCounterConfiguration counterSpecifier=\"\\LogicalDisk(_Total)\\% Free Space\" sampleRate=\"PT15S\" unit=\"Percent\"><annotation displayName=\"Disk free space (percentage)\" locale=\"en-us\"/></PerformanceCounterConfiguration></PerformanceCounters>",
-    "wadcfgxstart": "[concat(variables('wadlogs'),variables('wadperfcounters1'),variables('wadperfcounters2'),'<Metrics resourceId=\"')]",
-    "wadmetricsresourceid": "[concat('/subscriptions/',subscription().subscriptionId,'/resourceGroups/',resourceGroup().name ,'/providers/','Microsoft.Compute/virtualMachineScaleSets/',parameters('vmssName'))]",
-    "wadcfgxend": "[concat('\"><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>')]"
+    "networkApi": "2019-12-01",
+    "computeApi": "2019-12-01"
   },
 	"resources": [
 		{
-			"type": "Microsoft.Storage/storageAccounts",
-			"name": "[concat(variables('storageAccountPrefix')[copyIndex()],variables('newStorageAccountSuffix'))]",
-			"apiVersion": "2015-06-15",
-			"copy": {
-				"name": "storageLoop",
-				"count": 5
-			},
-			"location": "[parameters('location')]",
-			"properties": {
-				"accountType": "[variables('storageAccountType')]"
-			}
-		},
-		{
-			"apiVersion": "2015-06-15",
+        "name": "[parameters('virtualNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "[variables('networkApi')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "[parameters('addressPrefix')]"
+                ]
+            },
+            "subnets": [
+                {
+                    "name": "[parameters('subnetPrefix')]",
+                    "properties": {
+                        "addressPrefix": "[parameters('subnetPrefix')]"
+                    }
+                }
+            ]
+        }
+    },
+    {
+			"apiVersion": "[variables('networkApi')]",
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[variables('publicIPAddressName')]",
 			"location": "[parameters('location')]",
@@ -133,13 +125,16 @@
 			}
 		},
 		{
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('networkApi')]",
 			"name": "[variables('lbName')]",
 			"type": "Microsoft.Network/loadBalancers",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				"[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]"
 			],
+      "sku": {
+        "name": "Standard"
+      },
       "properties": {
         "frontendIPConfigurations": [
           {
@@ -204,25 +199,56 @@
         ]
       }
 		},
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2018-12-01",
+      "name": "[variables('nsgName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowHTTPInbound",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "priority": 1000,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
 		{
 			"type": "Microsoft.Compute/virtualMachineScaleSets",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('computeApi')]",
 			"name": "[parameters('vmSSName')]",
 			"location": "[parameters('location')]",
 			"tags": {
 				"vmsstag1": "Myriad"
 			},
       "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/a',variables('newStorageAccountSuffix'))]",
-        "[concat('Microsoft.Storage/storageAccounts/g',variables('newStorageAccountSuffix'))]",
-        "[concat('Microsoft.Storage/storageAccounts/m',variables('newStorageAccountSuffix'))]",
-        "[concat('Microsoft.Storage/storageAccounts/s',variables('newStorageAccountSuffix'))]",
-        "[concat('Microsoft.Storage/storageAccounts/y',variables('newStorageAccountSuffix'))]",
         "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]"
 
       ],
 			"sku": {
-				"name": "Standard_A2",
+				"name": "Standard_B2s",
 				"tier": "Standard",
 				"capacity": "[parameters('instanceCount')]"
 			},
@@ -233,13 +259,6 @@
 				"virtualMachineProfile": {
 					"storageProfile": {
 						"osDisk": {
-              "vhdContainers": [
-                "[concat('https://a',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-                "[concat('https://g',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-                "[concat('https://m',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-                "[concat('https://s',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]",
-                "[concat('https://y',variables('newStorageAccountSuffix'),'.blob.core.windows.net/vmss')]"
-              ],
 							"name": "vmssosdisk",
 							"caching": "ReadOnly",
 							"createOption": "FromImage"
@@ -259,7 +278,7 @@
 					"networkProfile": {
 						"networkInterfaceConfigurations": [
 							{
-								"name": "nic1",
+								"name": "[variables('nicName')]",
 								"properties": {
 									"primary": "true",
 									"ipConfigurations": [
@@ -278,7 +297,10 @@
                           {
                             "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/inboundNatPools/', variables('natPoolName'))]"
                           }
-                        ]
+                        ],
+                        "networkSecurityGroup": {
+                           "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                        }
                       }
 										}
 									]
@@ -300,24 +322,6 @@
 											"[variables('iisConfigurationScriptLocation')]"
 										],
 										"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ',variables('customScriptFile'),' -FileLocation ',variables('baseUrl'))]"
-									}
-								}
-							},
-							{
-								"name": "Microsoft.Insights.VMDiagnosticsSettings",
-								"properties": {
-									"publisher": "Microsoft.Azure.Diagnostics",
-									"type": "IaaSDiagnostics",
-									"typeHandlerVersion": "1.5",
-									"autoUpgradeMinorVersion": true,
-									"settings": {
-										"xmlCfg": "[base64(concat(variables('wadcfgxstart'),variables('wadmetricsresourceid'),variables('wadcfgxend')))]",
-										"storageAccount": "[variables('diagnosticsStorageAccountName')]"
-									},
-									"protectedSettings": {
-										"storageAccountName": "[variables('diagnosticsStorageAccountName')]",
-										"storageAccountKey": "[listkeys(variables('accountid'), '2015-06-15').key1]",
-										"storageAccountEndPoint": "https://core.windows.net"
 									}
 								}
 							}
