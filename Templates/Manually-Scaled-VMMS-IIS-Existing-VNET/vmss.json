@@ -1,0 +1,346 @@
+﻿{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmSSName": {
+      "type": "string",
+      "defaultValue": "iisvmss",
+      "metadata": {
+        "description": "The Name of the Scaleset"
+      }
+    },
+    "instanceCount": {
+      "type": "string",
+      "metadata": {
+        "description": "Number of VM instances"
+      }
+    },
+    "dnsNamePrefix": {
+      "type": "string",
+      "defaultValue": "mtiisskol",
+      "metadata": {
+        "description": "The Prefix for the DNS names of the new IP address created"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The User name of the admininstrative user for each vm created"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The Password of the admininstrative user for each vm created"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "North Europe",
+      "allowedValues": [
+        "North Europe",
+        "West Europe",
+        "[resourceGroup().location]"
+      ],
+      "metadata": {
+        "description": "Deployment location"
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "vNET"
+    },
+    "addressPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16"
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "Subnet"
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24"
+    }
+  },
+  "variables": {
+    "baseURL": "https://raw.githubusercontent.com/matousrokos/Azure/master/Templates/Manually-Scaled-VMMS-IIS-Standard-LB/Script/",
+    "customScriptFile": "SimpleDefaultIIS.ps1",
+    "iisConfigurationScriptLocation": "[concat(variables('baseURL'),variables('customScriptFile'))]",
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "imageVersion": "2016-Datacenter",
+    "vnetID": "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]",
+    "publicIPAddressName": "vmsspublicip",
+    "publicIPAddressID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]",
+    "nicName": "networkInterface1",
+    "nsgName": "[concat(parameters('vmSSName'),'-nsg')]",
+    "lbName": "iisloadBalancer",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
+    "lbFEName": "loadBalancerFrontEnd",
+    "lbWebProbeName": "loadBalancerWebProbe",
+    "lbBEAddressPool": "loadBalancerBEAddressPool",
+    "lbFEIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/',variables('lbFEName'))]",
+    "lbBEAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/',variables('lbBEAddressPool'))]",
+    "lbWebProbeID": "[concat(variables('lbID'),'/probes/',variables('lbWebProbeName'))]",
+    "natPoolName": "rdpnatpool",
+    "natStartPort": 50000,
+    "natEndPort": 50099,
+    "natBackendPort": 3389,
+    "networkApi": "2019-12-01",
+    "computeApi": "2019-12-01"
+  },
+	"resources": [
+		{
+        "name": "[parameters('virtualNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "[variables('networkApi')]",
+        "location": "[parameters('location')]",
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "[parameters('addressPrefix')]"
+                ]
+            },
+            "subnets": [
+                {
+                    "name": "[parameters('subnetName')]",
+                    "properties": {
+                        "addressPrefix": "[parameters('subnetPrefix')]"
+                    }
+                }
+            ]
+        }
+    },
+    {
+			"apiVersion": "[variables('networkApi')]",
+			"type": "Microsoft.Network/publicIPAddresses",
+			"name": "[variables('publicIPAddressName')]",
+			"location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard"
+      },
+			"properties": {
+				"publicIPAllocationMethod": "Static",
+				"dnsSettings": {
+					"domainNameLabel": "[parameters('dnsNamePrefix')]"
+				}
+			}
+		},
+		{
+			"apiVersion": "[variables('networkApi')]",
+			"name": "[variables('lbName')]",
+			"type": "Microsoft.Network/loadBalancers",
+			"location": "[parameters('location')]",
+			"dependsOn": [
+				"[concat('Microsoft.Network/publicIPAddresses/',variables('publicIPAddressName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
+			],
+      "sku": {
+        "name": "Standard"
+      },
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "[variables('lbFEName')]",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('publicIPAddressID')]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "[variables('lbBEAddressPool')]"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "weblb",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('lbFEIPConfigID')]"
+              },
+              "backendAddressPool": {
+                "id": "[variables('lbBEAddressPoolID')]"
+              },
+              "probe": {
+                "id": "[variables('lbWebProbeID')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 80,
+              "backendPort": 80,
+              "enableFloatingIP": false
+            }
+          }
+        ],
+        "inboundNatPools": [
+          {
+            "name": "[variables('natPoolName')]",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[variables('lbFEIPConfigID')]"
+              },
+              "protocol": "tcp",
+              "frontendPortRangeStart": "[variables('natStartPort')]",
+              "frontendPortRangeEnd": "[variables('natEndPort')]",
+              "backendPort": "[variables('natBackendPort')]"
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "[variables('lbWebProbeName')]",
+            "properties": {
+              "protocol": "http",
+              "port": 80,
+              "intervalInSeconds": "15",
+              "numberOfProbes": "5",
+              "requestPath": "/iisstart.htm"
+            }
+          }
+        ]
+      }
+		},
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "[variables('networkApi')]",
+      "name": "[variables('nsgName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "AllowHTTPInbound",
+            "properties": {
+              "protocol": "*",
+              "sourcePortRange": "*",
+              "destinationPortRange": "80",
+              "sourceAddressPrefix": "Internet",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          },
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "priority": 1000,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "3389"
+            }
+          }
+        ]
+      }
+    },
+		{
+			"type": "Microsoft.Compute/virtualMachineScaleSets",
+			"apiVersion": "[variables('computeApi')]",
+			"name": "[parameters('vmSSName')]",
+			"location": "[parameters('location')]",
+			"tags": {
+				"vmsstag1": "Myriad"
+			},
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
+
+      ],
+			"sku": {
+				"name": "Standard_B2s",
+				"tier": "Standard",
+				"capacity": "[parameters('instanceCount')]"
+			},
+			"properties": {
+				"upgradePolicy": {
+					"mode": "Manual"
+				},
+				"virtualMachineProfile": {
+					"storageProfile": {
+						"osDisk": {
+							"caching": "ReadOnly",
+							"createOption": "FromImage"
+						},
+						"imageReference": {
+							"publisher": "[variables('imagePublisher')]",
+							"offer": "[variables('imageOffer')]",
+							"sku": "[variables('imageVersion')]",
+							"version": "latest"
+						}
+					},
+					"osProfile": {
+						"computerNamePrefix": "[parameters('vmSSName')]",
+						"adminUsername": "[parameters('adminUsername')]",
+						"adminPassword": "[parameters('adminPassword')]"
+					},
+					"networkProfile": {
+						"networkInterfaceConfigurations": [
+							{
+								"name": "[variables('nicName')]",
+								"properties": {
+									"primary": "true",
+									"ipConfigurations": [
+										{
+											"name": "ip1",
+                      "properties": {
+                        "subnet": {
+                          "id": "[variables('subnetRef')]"
+                        },
+                        "loadBalancerBackendAddressPools": [
+                          {
+                            "id": "[ variables('lbBEAddressPoolID')]"
+                          }
+                        ],
+                        "loadBalancerInboundNatPools": [
+                          {
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('lbName'), '/inboundNatPools/', variables('natPoolName'))]"
+                          }
+                        ]
+                      }
+										}
+									]
+								}
+							}
+						]
+					},
+					"extensionProfile": {
+						"extensions": [
+							{
+								"name": "iisInstall",
+								"properties": {
+									"publisher": "Microsoft.Compute",
+									"type": "CustomScriptExtension",
+									"typeHandlerVersion": "1.4",
+									"autoUpgradeMinorVersion": false,
+									"settings": {
+										"fileUris": [
+											"[variables('iisConfigurationScriptLocation')]"
+										],
+										"commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -File ',variables('customScriptFile'),' -FileLocation ',variables('baseUrl'))]"
+									}
+								}
+							}
+						]
+					}
+				}
+			}
+		}
+	],
+	"outputs": {
+		"fqdn": {
+			"value": "[reference(variables('publicIPAddressID'),providers('Microsoft.Network','publicIPAddresses').apiVersions[0]).dnsSettings.fqdn]",
+			"type": "string"
+		},
+		"ipaddress": {
+			"value": "[reference(variables('publicIPAddressID'),providers('Microsoft.Network','publicIPAddresses').apiVersions[0]).ipAddress]",
+			"type": "string"
+		}
+	}
+}
