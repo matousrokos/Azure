@@ -39,7 +39,8 @@
       "defaultValue": "North Europe",
       "allowedValues": [
         "North Europe",
-        "West Europe"
+        "West Europe",
+        "[resourceGroup().location]"
       ],
       "metadata": {
         "description": "Deployment location"
@@ -95,7 +96,7 @@
         "name": "[parameters('virtualNetworkName')]",
         "type": "Microsoft.Network/virtualNetworks",
         "apiVersion": "[variables('networkApi')]",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('location')]",
         "properties": {
             "addressSpace": {
                 "addressPrefixes": [
@@ -248,7 +249,8 @@
 				"vmsstag1": "Myriad"
 			},
       "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]"
+        "[concat('Microsoft.Network/loadBalancers/',variables('lbName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/',parameters('virtualNetworkName'))]"
 
       ],
 			"sku": {

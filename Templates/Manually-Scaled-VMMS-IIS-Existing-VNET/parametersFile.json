@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmSSName": {
+      "value": "iisvmss"
+    },
+    "instanceCount": {
+      "value": "2"
+    },
+    "dnsNamePrefix": {
+      "value": "mtiisskol"
+    },
+    "adminUsername": {
+      "value": "matous"
+    },
+    "adminPassword": {
+      "value": ""
+    },
+    "location": {
+      "value": "North Europe"
+    },
+    "virtualNetworkName": {
+      "value": "vNET"
+    },
+    "addressPrefix": {
+      "value": "10.0.0.0/16"
+    },
+    "subnetName": {
+      "value": "Subnet"
+    },
+    "subnetPrefix": {
+      "value": "10.0.0.0/24"
+    }
+  }
+}
