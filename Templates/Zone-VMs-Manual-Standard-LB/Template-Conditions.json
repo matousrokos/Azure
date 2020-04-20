@@ -26,17 +26,6 @@
         "description": "Specifies the location for all of the resources created by this template. Availability zones are only supported in certain regions.  For the last supported zones, see https://docs.microsoft.com/en-us/azure/availability-zones/az-overview#services-support-by-region."
       }
     },
-    "instanceCount":{
-        "type": "int",
-        "allowedValues": [
-            1,
-            2,
-            3
-        ],
-        "metadata": {
-            "description": "Specifies number of VMs to be deployed. One VM per zone. Max count 3 since max number of zones"
-        }
-    },
     "adminUsername": {
       "type": "string",
       "metadata": {
@@ -48,6 +37,16 @@
       "metadata": {
         "description": "Specifies the virtual machine administrator password."
       }
+    },
+    "nicToLbPool" : {
+        "type": "string",
+        "metadata": {
+            "description": "Choose which NIC becomes primary for Loadbalancing"
+        },
+        "allowedValues": [
+            "NIC1",
+            "NIC2"
+        ]
     }
   },
   "variables": {
@@ -191,17 +190,13 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2018-10-01",
-      "name": "[concat(parameters('projectName'),'-vm', copyIndex(1))]",
+      "name": "[concat(parameters('projectName'),'-vm1')]",
       "location": "[parameters('location')]",
       "zones": [
-        "[copyIndex(1)]"
+        "1"
       ],
-      "copy": {
-        "name": "vmCopy",
-        "count": "[parameters('instanceCount')]"
-      },
       "dependsOn": [
-        "networkInterfaceCopy"
+        "[concat(parameters('projectName'),'-vm1','-networkInterface1')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -224,12 +219,12 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('projectName'),'-vm', copyIndex(1), '-networkInterface'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('projectName'),'-vm1','-networkInterface'))]"
             }
           ]
         },
         "osProfile": {
-          "computerName": "[concat(parameters('projectName'),'-vm', copyIndex(1))]",
+          "computerName": "[concat(parameters('projectName'),'-vm1')]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]",
           "windowsConfiguration": {
@@ -240,36 +235,62 @@
       }
     },
     {
-      "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2018-12-01",
-      "name": "[concat(parameters('projectName'),'-vm', copyIndex(1), '-publicIp')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2018-10-01",
+      "name": "[concat(parameters('projectName'),'-vm2')]",
       "location": "[parameters('location')]",
-      "sku": {
-        "name": "Standard"
-      },
-      "copy": {
-        "name": "publicIPAddressCopy",
-        "count": "[parameters('instanceCount')]"
-      },
+      "zones": [
+        "2"
+      ],
+      "dependsOn": [
+        "[concat(parameters('projectName'),'-vm2','-networkInterface2')]"
+      ],
       "properties": {
-        "publicIPAddressVersion": "IPv4",
-        "publicIPAllocationMethod": "Static"
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "MicrosoftWindowsServer",
+            "offer": "WindowsServer",
+            "sku": "2019-Datacenter",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "[variables('vmStorageAccountType')]"
+            }
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('projectName'),'-vm2','-networkInterface'))]"
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('projectName'),'-vm2')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "windowsConfiguration": {
+            "enableAutomaticUpdates": true,
+            "provisionVmAgent": true
+          }
+        }
       }
     },
     {
+      "condition": "[equals(parameters('nicToLbPool'), 'NIC1')]",
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2018-12-01",
-      "name": "[concat(parameters('projectName'),'-vm', copyIndex(1), '-networkInterface')]",
+      "name": "[concat(parameters('projectName'),'-vm1','-networkInterface1')]",
       "location": "[parameters('location')]",
-      "copy": {
-        "name": "networkInterfaceCopy",
-        "count": "[parameters('instanceCount')]"
-      },
       "dependsOn": [
         "[resourceId('Microsoft.Network/virtualNetworks/', variables('vNetName'))]",
         "[resourceId('Microsoft.Network/loadBalancers/', variables('lbName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]",
-        "publicIPAddressCopy"
+        "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -280,12 +301,9 @@
               "subnet": {
                 "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vNetName'), variables('vNetSubnetName'))]"
               },
-              "publicIpAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIpAddresses', concat(parameters('projectName'),'-vm', copyIndex(1), '-publicIp'))]"
-              },
               "loadBalancerBackendAddressPools": [
                 {
-                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', variables('lbName'), variables('lbBackendPoolName'))]"
+                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools/', variables('lbName'),'/',variables('lbBackendPoolName'))]"
                 }
               ]
             }
@@ -297,16 +315,119 @@
       }
     },
     {
+      "condition": "[equals(parameters('nicToLbPool'), 'NIC1')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-12-01",
+      "name": "[concat(parameters('projectName'),'-vm2','-networkInterface2')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks/', variables('vNetName'))]",
+        "[resourceId('Microsoft.Network/loadBalancers/', variables('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vNetName'), variables('vNetSubnetName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('nicToLbPool'), 'NIC2')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-12-01",
+      "name": "[concat(parameters('projectName'),'-vm2','-networkInterface1')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks/', variables('vNetName'))]",
+        "[resourceId('Microsoft.Network/loadBalancers/', variables('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vNetName'), variables('vNetSubnetName'))]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools/', variables('lbName'),'/',variables('lbBackendPoolName'))]"
+                }
+              ]
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        }
+      }
+    },
+    {
+      "condition": "[equals(parameters('nicToLbPool'), 'NIC2')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2018-12-01",
+      "name": "[concat(parameters('projectName'),'-vm1','-networkInterface2')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/virtualNetworks/', variables('vNetName'))]",
+        "[resourceId('Microsoft.Network/loadBalancers/', variables('lbName'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('nsgName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vNetName'), variables('vNetSubnetName'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        }
+      }
+    },
+    {
       "type": "Microsoft.Compute/virtualMachines/extensions",
       "apiVersion": "2018-10-01",
-      "name": "[concat(parameters('projectName'),'-vm', copyIndex(1), '/', 'InstallWebServer')]",
+      "name": "[concat(parameters('projectName'),'-vm1', '/', 'InstallWebServer')]",
       "location": "[parameters('location')]",
-      "copy": {
-        "name": "extensionCopy",
-        "count": "[parameters('instanceCount')]"
-      },
       "dependsOn": [
-        "vmCopy"
+          "[concat(parameters('projectName'),'-vm1')]"
+      ],
+      "properties": {
+        "publisher": "Microsoft.Compute",
+        "type": "CustomScriptExtension",
+        "typeHandlerVersion": "1.7",
+        "autoUpgradeMinorVersion": true,
+        "settings": {
+          "commandToExecute": "powershell.exe Install-WindowsFeature -name Web-Server -IncludeManagementTools && powershell.exe remove-item 'C:\\inetpub\\wwwroot\\iisstart.htm' && powershell.exe Add-Content -Path 'C:\\inetpub\\wwwroot\\iisstart.htm' -Value $('Hello World from ' + $env:computername)"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines/extensions",
+      "apiVersion": "2018-10-01",
+      "name": "[concat(parameters('projectName'),'-vm2', '/', 'InstallWebServer')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat(parameters('projectName'),'-vm2')]"
       ],
       "properties": {
         "publisher": "Microsoft.Compute",
