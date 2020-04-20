@@ -1,26 +1,77 @@
-$RG = "LBTestVMs"
+﻿using namespace System.Net
 
-$vnet = Get-AzVirtualNetwork -Name "LB-manual-vnet" -ResourceGroupName $RG
-$backendSubnet = Get-AzVirtualNetworkSubnetConfig -Name "BackendSubnet" -VirtualNetwork $vnet
+# Input bindings are passed in via param block.
+param($Request, $TriggerMetadata)
 
-$NICName = "testNIC2"
+# Write to the Azure Functions log stream.
+Write-Host "PowerShell HTTP trigger function processed a request."
 
-$lb = Get-AzLoadBalancer -ResourceGroupName $RG -Name "LB-manual-lb"
-$lbPoolConfig = Get-AzLoadBalancerBackendAddressPoolConfig -LoadBalancer $lb 
+# Interact with query parameters or the body of the request.
+$ActivateZone = $Request.Query.ActivateZone
+if (-not $ActivateZone) {
+    $ActivateZone = $Request.Body.ActivateZone
+}
 
+if ($ActivateZone) {
+    $status = [HttpStatusCode]::OK
 
-$NIC = Get-AzNetworkInterface -ResourceGroupName $RG -Name $NICName 
-$NIC.IpConfigurations[0].LoadBalancerBackendAddressPools=$lbPoolConfig
-Set-AzNetworkInterface -NetworkInterface $NIC
+    if ($ActivateZone -eq "1") {
+        $RG = "LBTest"
+        $ActivateNICName = "LB-manual-vm1-networkInterface"
+        $DeactivateNICName = "LB-manual-vm2-networkInterface"
 
-$lb | Set-AzLoadBalancer 
+        $ActivateNIC = Get-AzNetworkInterface -ResourceGroupName $RG -Name $ActivateNICName
+    
+        $lb = Get-AzLoadBalancer -ResourceGroupName $RG -Name "LB-manual-lb"
+        $lbPoolConfig = Get-AzLoadBalancerBackendAddressPoolConfig -LoadBalancer $lb 
 
+        $ActivateNIC.IpConfigurations[0].LoadBalancerBackendAddressPools=$lbPoolConfig
+        Set-AzNetworkInterface -NetworkInterface $ActivateNIC
+    
+    
+        $DeactivateNIC = Get-AzNetworkInterface -ResourceGroupName $RG -Name $DeactivateNICName
+        $DeactivateNIC.IpConfigurations[0].LoadBalancerBackendAddressPools = $null
+        Set-AzNetworkInterface -NetworkInterface $DeactivateNIC
 
+        $body = "zone 1 activated"
+        }
+    
+    if ($ActivateZone -eq "2") {
 
-$removeConfig = Remove-AzNetworkInterfaceIpConfig -NetworkInterface $NIC
-Set-AzNetworkInterfaceIpConfig -NetworkInterface $NIC -Name "ipconfig1" -PrivateIpAddress 10.0.1.4 -Subnet $backendSubnet -PublicIpAddress  -ApplicationSecurityGroup
+        $RG = "LBTest"
+        $ActivateNICName = "LB-manual-vm2-networkInterface"
+        $DeactivateNICName = "LB-manual-vm1-networkInterface"
 
-New-AzNetworkInterfaceIpConfig -Name ipconfig1 -PrivateIpAddress 10.0.1.4 -Subnet $backendSubnet 
-$nic | Set-AzNetworkInterfaceIpConfig -Name ipconfig1 -PrivateIpAddress 10.0.1.4 -Subnet $backendSubnet -Primary
+        $ActivateNIC = Get-AzNetworkInterface -ResourceGroupName $RG -Name $ActivateNICName
 
-$nic | Set-AzNetworkInterface
+        $lb = Get-AzLoadBalancer -ResourceGroupName $RG -Name "LB-manual-lb"
+        $lbPoolConfig = Get-AzLoadBalancerBackendAddressPoolConfig -LoadBalancer $lb 
+
+        $ActivateNIC.IpConfigurations[0].LoadBalancerBackendAddressPools=$lbPoolConfig
+        Set-AzNetworkInterface -NetworkInterface $ActivateNIC
+    
+    
+        $DeactivateNIC = Get-AzNetworkInterface -ResourceGroupName $RG -Name $DeactivateNICName
+        $DeactivateNIC.IpConfigurations[0].LoadBalancerBackendAddressPools = $null
+        Set-AzNetworkInterface -NetworkInterface $DeactivateNIC
+
+        $body = "zone 2 activated"
+    }
+
+    else {
+    $body = "zone must be 1 or 2"
+    }
+}
+
+else {
+    $status = [HttpStatusCode]::BadRequest
+    $body = "Pass a Zone name on the query string or in the request body. Allowed Zone names are 1 or 2"
+}
+
+Write-host $body
+
+# Associate values to output bindings by calling 'Push-OutputBinding'.
+Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
+    StatusCode = $status
+    Body = $body
+})
