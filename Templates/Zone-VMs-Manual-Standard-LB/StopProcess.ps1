@@ -1,1 +1,2 @@
-Stop-Process -name mspaint -force
+Stop-Process -Name Powel.CompositeWpf.Shells.WorkflowShell -force
+Stop-Process -Name RCEditor -force
