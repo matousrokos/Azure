@@ -1,1 +1,1 @@
-Stop-Process -name mspaint
+Stop-Process -name mspaint -force
