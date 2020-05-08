@@ -1,11 +1,12 @@
-$RCEditor = Get-Process -Name RCEditor | select Id
+$RCEditor = Get-Process -Name RCEditor | select Id -ExpandProperty Id
 
 foreach ($Id in $RCE) { 
-Stop-Process -Name RCEditor -Force
+Stop-Process -Id $Id -Force
 }
 
-$Nimbus = Get-Process -Name Powel.CompositeWpf.Shells.WorkflowShell | select Id
+$Nimbus = Get-Process -Name Powel.CompositeWpf.Shells.WorkflowShell | select Id -ExpandProperty Id
+
 
 foreach ($Id in $Nimbus) { 
-Stop-Process -Name Powel.CompositeWpf.Shells.WorkflowShell -Force
+Stop-Process -Id $Id -Force
 }
